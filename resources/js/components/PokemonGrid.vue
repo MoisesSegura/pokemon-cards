@@ -2,31 +2,78 @@
     <div :class="['p-30 transition-colors duration-500', fondoPorTipo]">
       <TipoFiltro :tipos="tiposDisponibles" @filtrarPorTipo="filtrarCartas" />
   
-      <div v-if="loading">Cargando cartas...</div>
+      <div v-if="loading" class="flex flex-col items-center justify-center py-10">
+    <img
+    src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
+    alt="Pokeball loader"
+    class="w-16 h-16 animate-spin"/>
+    <p class="mt-4 text-lg text-gray-700 font-semibold">Cargando cartas...</p>
+    </div>
+
       <div v-else-if="filteredCards.length === 0">No se encontraron cartas.</div>
       <div v-else class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        <div v-for="card in filteredCards" :key="card.id" class="rounded p-2 shadow">
-          <div class="rounded overflow-hidden shadow hover:scale-105 transition-transform">
-            <img :src="card.images?.small" :alt="card.name" class="w-full" />
-          </div>
-        </div>
-      </div>
+  <PokemonCard
+    v-for="card in filteredCards"
+    :key="card.id"
+    :card="card"
+    @ver-info="mostrarDetalle"
+  />
+</div>
+
+
+<div
+v-if="cartaSeleccionada"
+  class="fixed inset-0 flex items-center justify-center z-50"
+  style="perspective: 1000px;"
+>
+  <div
+    class="absolute inset-0 bg-black opacity-50"
+    @click="cartaSeleccionada = null"
+  ></div>
+
+  <div
+  ref="cartaTilt"
+  @mousemove="moverCarta"
+  @mouseleave="resetearCarta"
+  class="relative bg-white rounded-lg shadow-lg p-6 max-w-md w-full z-10 transition-transform duration-300 ease-out"
+  :style="{ transform: tiltTransform, willChange: 'transform', transformStyle: 'preserve-3d' }"
+  >
+    <button
+      @click="cartaSeleccionada = null"
+      class="absolute top-2 right-2 text-red-600 text-xl font-bold"
+    >
+      &times;
+    </button>
+    <h2 class="text-2xl font-bold mb-2">{{ cartaSeleccionada.name }}</h2>
+    <img :src="cartaSeleccionada.images?.large" alt="" class="w-full mb-4" />
+    <p><strong>Tipo:</strong> {{ cartaSeleccionada.types?.join(', ') }}</p>
+    <p><strong>Rareza:</strong> {{ cartaSeleccionada.rarity || 'N/A' }}</p>
+    <p><strong>Subtipo:</strong> {{ cartaSeleccionada.subtypes?.join(', ') }}</p>
+    <p><strong>Artista:</strong> {{ cartaSeleccionada.artist || 'N/A' }}</p>
+  </div>
+</div>
+
     </div>
+    
   </template>
   
   <script>
   import axios from 'axios';
   import TipoFiltro from './TipoFiltro.vue';
+  import PokemonCard from './PokemonCard.vue';
+
   
   export default {
-    components: { TipoFiltro },
+    components: { TipoFiltro, PokemonCard },
     data() {
       return {
         cards: [],
         filteredCards: [],
         loading: true,
         tiposDisponibles: [],
-         tipoSeleccionado: 'Todos'
+         tipoSeleccionado: 'Todos',
+         cartaSeleccionada: null, 
+           tiltTransform: 'scale(1)',
       };
     },
         methods: {
@@ -39,7 +86,29 @@
             card.types?.includes(tipo)
         );
         }
-    }
+    },
+
+    mostrarDetalle(card) {
+    this.cartaSeleccionada = card;
+  },
+
+
+  moverCarta(e) {
+    const card = this.$refs.cartaTilt;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = ((y - centerY) / centerY) * -10;
+    const rotateY = ((x - centerX) / centerX) * 10;
+
+    this.tiltTransform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+  },
+  resetearCarta() {
+  this.tiltTransform = 'rotateX(0deg) rotateY(0deg) scale(1)';
+}
+
     },
 
     mounted() {
@@ -74,7 +143,7 @@
         return 'bg-gradient-to-br from-green-400 to-lime-300';
       case 'Lightning':
         return 'bg-gradient-to-br from-yellow-300 to-yellow-100';
-      case 'Psysic':
+      case 'Psychic':
         return 'bg-gradient-to-br from-purple-400 to-pink-300';
       case 'Ground':
         return 'bg-gradient-to-br from-yellow-800 to-yellow-400';
@@ -83,9 +152,11 @@
       case 'Fighting':
         return 'bg-gradient-to-br from-red-800 to-Red-700';
       case 'Darkness':
-        return 'bg-gradient-to-br from-slate-900 to-gray-800';
+        return 'bg-gradient-to-r from-slate-900 to-slate-700';
       case 'Dragon':
-        return 'bg-gradient-to-br from-blue-500 to-indigo-500';
+        return 'bg-gradient-to-br from-blue-300 to-indigo-200';
+      case 'Fairy':
+        return 'bg-gradient-to-br from-pink-300 to-pink-100';
       default:
         return 'bg-gradient-to-r from-gray-100 to-white';
     }
