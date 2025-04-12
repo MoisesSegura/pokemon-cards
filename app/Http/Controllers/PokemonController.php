@@ -13,7 +13,7 @@ class PokemonController extends Controller
     
         $response = Http::withHeaders([
             'X-Api-Key' => $apiKey,
-        ])->get('https://api.pokemontcg.io/v2/cards?page=5&pageSize=250');
+        ])->get('https://api.pokemontcg.io/v2/cards?page=1&pageSize=250');
 
         //https://api.pokemontcg.io/v2/cards?pageSize=250
     
@@ -21,5 +21,25 @@ class PokemonController extends Controller
     
         return response()->json($cartas);
     }
+
+
+    public function buscarPorNombre(Request $request)
+    {
+        $nombre = $request->query('nombre');
+    
+        if (!$nombre) {
+            return response()->json(['data' => []]);
+        }
+    
+        $response = Http::withHeaders([
+            'X-Api-Key' => config('services.pokemon.key'),
+        ])->get('https://api.pokemontcg.io/v2/cards', [
+            'q' => "name:$nombre",
+            'pageSize' => 50
+        ]);
+    
+        return response()->json($response->json());
+    }
+    
     
 }

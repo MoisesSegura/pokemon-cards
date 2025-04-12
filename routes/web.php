@@ -8,3 +8,4 @@ Route::get('/', function () {
 });
 
 Route::get('/cartas', [PokemonController::class, 'obtenerCartas']);
+Route::get('/buscar', [PokemonController::class, 'buscarPorNombre']);

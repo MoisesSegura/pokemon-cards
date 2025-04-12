@@ -1,5 +1,6 @@
 <template>
-    <div :class="['p-30 transition-colors duration-500', fondoPorTipo]">
+    <div :class="['min-h-screen p-30 transition-colors duration-500', fondoPorTipo]">
+      <BuscadorPokemon @buscarPokemon="buscarPorNombre" />
       <TipoFiltro :tipos="tiposDisponibles" @filtrarPorTipo="filtrarCartas" />
   
       <div v-if="loading" class="flex flex-col items-center justify-center py-10">
@@ -38,6 +39,12 @@ v-if="cartaSeleccionada"
   class="relative bg-white rounded-lg shadow-lg p-6 max-w-md w-full z-10 transition-transform duration-300 ease-out"
   :style="{ transform: tiltTransform, willChange: 'transform', transformStyle: 'preserve-3d' }"
   >
+  
+  <div
+    class="absolute inset-0 pointer-events-none transition-opacity duration-300"
+    :style="lightStyle"
+  ></div>
+
     <button
       @click="cartaSeleccionada = null"
       class="absolute top-2 right-2 text-red-600 text-xl font-bold"
@@ -59,21 +66,24 @@ v-if="cartaSeleccionada"
   
   <script>
   import axios from 'axios';
+  import BuscadorPokemon from "./BuscadorPokemon.vue";
   import TipoFiltro from './TipoFiltro.vue';
   import PokemonCard from './PokemonCard.vue';
 
   
   export default {
-    components: { TipoFiltro, PokemonCard },
+    components: { TipoFiltro, PokemonCard, BuscadorPokemon },
     data() {
       return {
         cards: [],
         filteredCards: [],
+        cartas: [],
         loading: true,
         tiposDisponibles: [],
          tipoSeleccionado: 'Todos',
          cartaSeleccionada: null, 
            tiltTransform: 'scale(1)',
+
       };
     },
         methods: {
@@ -104,10 +114,32 @@ v-if="cartaSeleccionada"
     const rotateY = ((x - centerX) / centerX) * 10;
 
     this.tiltTransform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+
+    const percentX = (x / rect.width) * 100;
+  const percentY = (y / rect.height) * 100;
+
+  this.lightStyle = {
+    backgroundImage: `radial-gradient(circle at ${percentX}% ${percentY}%, rgba(255,255,255,0.3), transparent 60%)`,
+  };
+
   },
   resetearCarta() {
   this.tiltTransform = 'rotateX(0deg) rotateY(0deg) scale(1)';
+  this.lightStyle = {};
+},
+async buscarPorNombre(nombre) {
+  this.loading = true;
+  try {
+    const response = await fetch(`/buscar?nombre=${encodeURIComponent(nombre)}`);
+    const data = await response.json();
+    this.filteredCards = data.data || [];
+  } catch (error) {
+    console.error("Error al buscar:", error);
+  } finally {
+    this.loading = false;
+  }
 }
+
 
     },
 
@@ -148,7 +180,7 @@ v-if="cartaSeleccionada"
       case 'Ground':
         return 'bg-gradient-to-br from-yellow-800 to-yellow-400';
       case 'Metal':
-        return 'bg-gradient-to-br from-gray-800 to-white-400';
+        return 'bg-gradient-to-br from-gray-700 to-gray-400';
       case 'Fighting':
         return 'bg-gradient-to-br from-red-800 to-Red-700';
       case 'Darkness':
@@ -157,8 +189,10 @@ v-if="cartaSeleccionada"
         return 'bg-gradient-to-br from-blue-300 to-indigo-200';
       case 'Fairy':
         return 'bg-gradient-to-br from-pink-300 to-pink-100';
+      case 'Colorless':
+        return 'bg-gradient-to-br from-white to-grey-100';
       default:
-        return 'bg-gradient-to-r from-gray-100 to-white';
+        return 'bg-gradient-to-r from-red-300 via-green-300 to-blue-300';
     }
   }
 }
