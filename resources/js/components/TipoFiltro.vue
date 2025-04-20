@@ -32,7 +32,7 @@ export default {
         Fighting: 'bg-red-500 hover:bg-red-700',
         Dragon: 'bg-indigo-500 hover:bg-indigo-700',
         Fairy: 'bg-rose-500 hover:bg-rose-700',
-        Todos: 'bg-gradient-to-r from-red-500 via-green-500 to-blue-500 hover:from-pink-600 hover:via-gray-600 hover:to-orange-600',
+        All: 'bg-gradient-to-r from-red-500 via-green-500 to-blue-500 hover:from-pink-600 hover:via-gray-600 hover:to-orange-600',
       }
     };
   }

@@ -34,7 +34,7 @@ class PokemonController extends Controller
         $response = Http::withHeaders([
             'X-Api-Key' => config('services.pokemon.key'),
         ])->get('https://api.pokemontcg.io/v2/cards', [
-            'q' => "name:$nombre",
+            'q' => "name:*$nombre*",
             'pageSize' => 50
         ]);
     

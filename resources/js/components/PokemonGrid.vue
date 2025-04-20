@@ -8,10 +8,10 @@
     src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
     alt="Pokeball loader"
     class="w-16 h-16 animate-spin"/>
-    <p class="mt-4 text-lg text-gray-700 font-semibold">Cargando cartas...</p>
+    <p class="mt-4 text-lg text-gray-700 font-semibold">Loading cards...</p>
     </div>
 
-      <div v-else-if="filteredCards.length === 0">No se encontraron cartas.</div>
+      <div v-else-if="filteredCards.length === 0">No cards found.</div>
       <div v-else class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
   <PokemonCard
     v-for="card in filteredCards"
@@ -44,20 +44,20 @@ v-if="cartaSeleccionada"
     class="absolute inset-0 pointer-events-none transition-opacity duration-300"
     :style="lightStyle"
   ></div>
+      <img :src="cartaSeleccionada.images?.large" alt="" class="w-full mb-4" />
+      <div v-if="cartaSeleccionada.tcgplayer?.prices?.holofoil">
+      <p><strong>Market: ${{ cartaSeleccionada.tcgplayer.prices.holofoil.market }}</strong></p>
+      <p class="text-green-500"><strong>Low: ${{ cartaSeleccionada.tcgplayer.prices.holofoil.low }}</strong></p>
+      <p class="text-yellow-500"><strong>Mid: ${{ cartaSeleccionada.tcgplayer.prices.holofoil.mid }}</strong></p>
+      <p class="text-red-500"><strong>High: ${{ cartaSeleccionada.tcgplayer.prices.holofoil.high }}</strong></p>
+      <p><strong>Direct Low: ${{ cartaSeleccionada.tcgplayer.prices.holofoil.directLow }}</strong></p>
+    </div>
+    <div v-else>
+      <p class="text-gray-500 text-sm">There is no price data for this card.</p>
+    </div>
 
-    <button
-      @click="cartaSeleccionada = null"
-      class="absolute top-2 right-2 text-red-600 text-xl font-bold"
-    >
-      &times;
-    </button>
-    <h2 class="text-2xl font-bold mb-2">{{ cartaSeleccionada.name }}</h2>
-    <img :src="cartaSeleccionada.images?.large" alt="" class="w-full mb-4" />
-    <p><strong>Tipo:</strong> {{ cartaSeleccionada.types?.join(', ') }}</p>
-    <p><strong>Rareza:</strong> {{ cartaSeleccionada.rarity || 'N/A' }}</p>
-    <p><strong>Subtipo:</strong> {{ cartaSeleccionada.subtypes?.join(', ') }}</p>
-    <p><strong>Artista:</strong> {{ cartaSeleccionada.artist || 'N/A' }}</p>
   </div>
+  
 </div>
 
     </div>
@@ -80,7 +80,7 @@ v-if="cartaSeleccionada"
         cartas: [],
         loading: true,
         tiposDisponibles: [],
-         tipoSeleccionado: 'Todos',
+         tipoSeleccionado: 'All',
          cartaSeleccionada: null, 
            tiltTransform: 'scale(1)',
 
@@ -89,7 +89,7 @@ v-if="cartaSeleccionada"
         methods: {
     filtrarCartas(tipo) {
         this.tipoSeleccionado = tipo;
-        if (tipo === 'Todos') {
+        if (tipo === 'All') {
         this.filteredCards = this.cards;
         } else {
         this.filteredCards = this.cards.filter(card =>
@@ -154,7 +154,7 @@ async buscarPorNombre(nombre) {
           this.cards.forEach(card => {
             (card.types || []).forEach(t => tipos.add(t));
           });
-          this.tiposDisponibles = ['Todos', ...Array.from(tipos)];
+          this.tiposDisponibles = ['All', ...Array.from(tipos)];
   
           this.loading = false;
         })
